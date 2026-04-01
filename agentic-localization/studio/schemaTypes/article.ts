@@ -73,6 +73,11 @@ export const article = defineType({
       type: 'array',
       of: [defineArrayMember({type: 'reference', to: [{type: 'tag'}]})],
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seo',
+    }),
   ],
   orderings: [
     {

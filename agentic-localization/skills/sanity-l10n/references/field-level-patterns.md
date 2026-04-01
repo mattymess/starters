@@ -272,6 +272,11 @@ pattern as `useFieldTranslateActions.processCell()` but does not track workflow
 metadata (no `needsReview` state). It's a quick-translate convenience for editors
 working directly in the form.
 
+Supports `internationalizedArray*` fields nested inside object types (e.g.,
+`seo.metaTitle`). Uses `resolvePathValue()` to traverse the full field path
+from `AssistFieldActionProps.path`, and dot-joined paths for Sanity patch
+operations.
+
 ## Metadata Schema
 
 The `fieldTranslation.metadata` schema

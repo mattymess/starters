@@ -32,6 +32,19 @@ import type {InternationalizedArrayItem} from 'sanity-plugin-internationalized-a
 import {useTranslate} from '../useTranslate'
 import {useLocales, type Language} from '../translations/useLocales'
 
+/** Resolve a value at a nested path (e.g. ['seo', 'metaTitle']) from a document. */
+export function resolvePathValue(
+  obj: Record<string, unknown>,
+  segments: (string | number)[],
+): unknown {
+  let current: unknown = obj
+  for (const seg of segments) {
+    if (current == null || typeof current !== 'object' || Array.isArray(current)) return undefined
+    current = (current as Record<string, unknown>)[seg]
+  }
+  return current
+}
+
 export function useTranslateFieldAction(
   props: AssistFieldActionProps,
 ): (AssistFieldActionNode | undefined)[] {
@@ -50,10 +63,11 @@ export function useTranslateFieldAction(
     if (!isInternationalizedArray || languages.length === 0) return []
 
     const doc = getDocumentValue() as Record<string, unknown> | undefined
-    const fieldName = path.length > 0 ? (path[0] as string) : undefined
-    if (!fieldName || !doc) return []
+    if (path.length === 0 || !doc) return []
 
-    const currentEntries = (doc[fieldName] ?? []) as InternationalizedArrayItem[]
+    const pathSegments = path as string[]
+    const fieldPath = pathSegments.join('.')
+    const currentEntries = (resolvePathValue(doc, pathSegments) ?? []) as InternationalizedArrayItem[]
 
     const filledLocales = new Set(
       currentEntries.filter((e) => e.value != null && e.value !== '').map((e) => e.language),
@@ -68,7 +82,7 @@ export function useTranslateFieldAction(
           onAction: async () => {
             const sourceDoc = getDocumentValue() as Record<string, unknown>
 
-            const entries = (sourceDoc[fieldName] ?? []) as InternationalizedArrayItem[]
+            const entries = (resolvePathValue(sourceDoc, pathSegments) ?? []) as InternationalizedArrayItem[]
             const baseEntry = entries.find((e) => e.value != null && e.value !== '')
             if (!baseEntry?.value || !baseEntry._key) return
             const fromLanguage = baseEntry.language ?? 'en-US'
@@ -93,25 +107,26 @@ export function useTranslateFieldAction(
                 documentId: documentIdForAction,
                 fromLanguage: {id: fromLanguage},
                 toLanguage: {id: lang.id, title: lang.title},
-                target: {path: [fieldName, {_key: baseEntry._key}, 'value']},
+                target: {path: [...pathSegments, {_key: baseEntry._key}, 'value']},
                 noWrite: true,
               },
               sourceDoc,
             )
 
             // Extract translated value from the returned document.
-            const translatedEntries = ((translated as Record<string, unknown> | null)?.[
-              fieldName
-            ] ?? []) as InternationalizedArrayItem[]
+            const translatedEntries = (resolvePathValue(
+              (translated as Record<string, unknown> | null) ?? {},
+              pathSegments,
+            ) ?? []) as InternationalizedArrayItem[]
             const translatedEntry = translatedEntries.find((e) => e._key === baseEntry._key)
             if (!translatedEntry?.value) return
 
             // Write the target entry with the translated value.
             await client
               .patch(documentIdForAction)
-              .setIfMissing({[fieldName]: []})
-              .unset([`${fieldName}[language=="${lang.id}"]`])
-              .append(fieldName, [
+              .setIfMissing({[fieldPath]: []})
+              .unset([`${fieldPath}[language=="${lang.id}"]`])
+              .append(fieldPath, [
                 {_key: entryKey, _type: itemType, language: lang.id, value: translatedEntry.value},
               ])
               .commit()

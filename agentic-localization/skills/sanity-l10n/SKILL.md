@@ -40,7 +40,7 @@ Read `references/architecture.md` for the full project map. Key entry points:
   hooks, evals. Sub-path exports keep serverless functions React-free.
 - `functions/` — Two Sanity Functions: mark translations stale on publish,
   analyze changes + pre-translate.
-- `studio/` — Studio workspace with article, person, topic, tag types.
+- `studio/` — Studio workspace with article, person, seo (object), topic, tag types.
 - `apps/translations-dashboard/` — Real-time translation overview (App SDK).
 - `apps/frontend/` — Next.js frontend with path-based i18n routing.
 - `sanity.blueprint.ts` — Infrastructure-as-code: dataset, robot token,
