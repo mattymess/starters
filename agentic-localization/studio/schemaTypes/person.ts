@@ -19,6 +19,18 @@ export const person = defineType({
       type: 'internationalizedArrayText',
     }),
     defineField({
+      name: 'showTagline',
+      title: 'Show Tagline',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'tagline',
+      title: 'Tagline',
+      type: 'internationalizedArrayString',
+      hidden: ({parent}) => !parent?.showTagline,
+    }),
+    defineField({
       name: 'image',
       title: 'Image',
       type: 'image',
