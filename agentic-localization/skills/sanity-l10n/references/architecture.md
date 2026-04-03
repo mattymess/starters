@@ -163,7 +163,7 @@ Agent Actions Translate API call
 | `l10n.style-guide`        | document | title, locale (ref), formality, tone[], additionalInstructions (PT)             | `schemas/translationStyleGuide.ts` |
 | `l10n.locale.translation` | object   | locale (ref), translation, gender                                               | `schemas/localeTranslation.ts`     |
 | `fieldTranslation.metadata` | document | documentRef (weak ref), documentType, workflowStates[] (field, language, status, source, sourceSnapshot) | `schemas/fieldTranslationMetadata.ts` |
-| `seo`                       | object   | metaTitle (string), metaDescription (text), ogImage (image w/ hotspot) | `studio/schemaTypes/seo.ts`        |
+| `seo`                       | object   | metaTitle (i18nString), metaDescription (i18nText), ogImage (image w/ hotspot) | `studio/schemaTypes/seo.ts`        |
 
 ## GROQ Queries
 
